@@ -19,6 +19,7 @@ export default function (Vue) {
    * Vuex init hook, injected into each instances init hooks list.
    */
 
+  //  将store注入到this.$store上：根组件从this.$options上读取store，非根组件引用父组件的$store属性
   function vuexInit () {
     const options = this.$options
     // store injection
