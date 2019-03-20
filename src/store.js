@@ -16,27 +16,32 @@ export class Store {
       install(window.Vue)
     }
 
+    // 环境检测
+    // 1. 是否加载过Vue
+    // 2. 是否支持Promise
+    // 3. 是否是构造器调用
     if (process.env.NODE_ENV !== 'production') {
       assert(Vue, `must call Vue.use(Vuex) before creating a store instance.`)
       assert(typeof Promise !== 'undefined', `vuex requires a Promise polyfill in this browser.`)
       assert(this instanceof Store, `store must be called with the new operator.`)
     }
 
+    // 初始化内部属性
     const {
       plugins = [],
       strict = false
     } = options
 
     // store internal state
-    this._committing = false
-    this._actions = Object.create(null)
-    this._actionSubscribers = []
-    this._mutations = Object.create(null)
-    this._wrappedGetters = Object.create(null)
-    this._modules = new ModuleCollection(options)
-    this._modulesNamespaceMap = Object.create(null)
-    this._subscribers = []
-    this._watcherVM = new Vue()
+    this._committing = false // 是否在进行提交状态标识
+    this._actions = Object.create(null) // acitons操作对象
+    this._actionSubscribers = [] // action订阅数组
+    this._mutations = Object.create(null) // mutations操作对象
+    this._wrappedGetters = Object.create(null) // 封装后的getters集合对象
+    this._modules = new ModuleCollection(options) // Vuex支持store分模块传入，存储分析后的modules
+    this._modulesNamespaceMap = Object.create(null) // 模块命名空间map
+    this._subscribers = [] // 订阅函数集合，Vuex提供了subscribe功能
+    this._watcherVM = new Vue() // Vue组件用于watch监视变化
 
     // bind commit and dispatch to self
     const store = this

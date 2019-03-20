@@ -1,6 +1,7 @@
 import Module from './module'
 import { assert, forEachValue } from '../util'
 
+// ModuleCollection主要将传入的options对象整个构造为一个module对象
 export default class ModuleCollection {
   constructor (rawRootModule) {
     // register root module (Vuex.Store options)
