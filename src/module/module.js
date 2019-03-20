@@ -2,6 +2,7 @@ import { forEachValue } from '../util'
 
 // Base data struct for store's module, package with some attribute and method
 export default class Module {
+  // Module的构造器函数其实很简单，保存了_rawModule,runtime，设置了state和_children
   constructor (rawModule, runtime) {
     this.runtime = runtime
     // Store some children item
@@ -30,6 +31,7 @@ export default class Module {
     return this._children[key]
   }
 
+  // update方法主要更新了_rawModule属性，当时确没有更新其中的state
   update (rawModule) {
     this._rawModule.namespaced = rawModule.namespaced
     if (rawModule.actions) {

@@ -3,12 +3,14 @@ import { assert, forEachValue } from '../util'
 
 // ModuleCollection主要将传入的options对象整个构造为一个module对象
 export default class ModuleCollection {
+  // 返回一个有root属性的对象
   constructor (rawRootModule) {
     // register root module (Vuex.Store options)
     this.register([], rawRootModule, false)
   }
 
   get (path) {
+    // 哇！这里的办法好棒！
     return path.reduce((module, key) => {
       return module.getChild(key)
     }, this.root)
@@ -26,8 +28,10 @@ export default class ModuleCollection {
     update([], this.root, rawRootModule)
   }
 
+  // runtime属性用来标志是否是动态添加进去的模块
   register (path, rawModule, runtime = true) {
     if (process.env.NODE_ENV !== 'production') {
+      // 检测rawModule内 getters,mutations,actions内值的类型是否正确
       assertRawModule(path, rawModule)
     }
 
@@ -41,7 +45,9 @@ export default class ModuleCollection {
 
     // register nested modules
     if (rawModule.modules) {
+      // 循环调用 this.register方法为其中的modules属性进行模块注册，使其都成为module对象
       forEachValue(rawModule.modules, (rawChildModule, key) => {
+        // 这里通过path.concat(key)来表示模块的深度
         this.register(path.concat(key), rawChildModule, runtime)
       })
     }
@@ -85,6 +91,7 @@ function update (path, targetModule, newModule) {
   }
 }
 
+// 由此往下代码都只在非生产模式下运行
 const functionAssert = {
   assert: value => typeof value === 'function',
   expected: 'function'
@@ -96,6 +103,8 @@ const objectAssert = {
   expected: 'function or object with "handler" function'
 }
 
+// getters和mutations里的属性都只能是函数
+// actions里的属性既可以是函数也可以是有handler属性为函数的对象
 const assertTypes = {
   getters: functionAssert,
   mutations: functionAssert,
