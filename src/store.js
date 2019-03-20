@@ -45,6 +45,7 @@ export class Store {
 
     // bind commit and dispatch to self
     const store = this
+    // 封装替换原型中的dispatch和commit方法，并将方法中的this指向当前store对象
     const { dispatch, commit } = this
     this.dispatch = function boundDispatch (type, payload) {
       return dispatch.call(store, type, payload)
@@ -107,6 +108,7 @@ export class Store {
         handler(payload)
       })
     })
+    // 触发subscribe函数遍历执行，传入当前的mutation对象和当前的state
     this._subscribers.forEach(sub => sub(mutation, this.state))
 
     if (
@@ -147,10 +149,12 @@ export class Store {
       }
     }
 
+    // 如果this._actions中存在对应action则执行
     const result = entry.length > 1
       ? Promise.all(entry.map(handler => handler(payload)))
       : entry[0](payload)
 
+    // subscribeAction订阅支持指定在action分发之前还是之后
     return result.then(res => {
       try {
         this._actionSubscribers
@@ -222,6 +226,10 @@ export class Store {
     resetStore(this, true)
   }
 
+  // 专用修改state方法，其他修改state方法均是非法修改
+  // 缓存执行时的committing状态将当前状态设置为true后进行本次提交操作
+  // 待操作完毕后，将committing状态还原为之前的状态
+  // 直接修改state，strict模式下_committing为false时，Vuex将会产生非法修改state的警告
   _withCommit (fn) {
     const committing = this._committing
     this._committing = true
@@ -484,6 +492,8 @@ function getNestedState (state, path) {
     : state
 }
 
+// 格式化
+// 兼容只有两个参数{type:xxx,payload:xxxx},options的写法
 function unifyObjectStyle (type, payload, options) {
   if (isObject(type) && type.type) {
     options = payload
