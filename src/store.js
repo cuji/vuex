@@ -77,10 +77,12 @@ export class Store {
     }
   }
 
+  // 使用store.state代理内部真正存放的$$state
   get state () {
     return this._vm._data.$$state
   }
 
+  // 限制直接修改state，其实也修改不了
   set state (v) {
     if (process.env.NODE_ENV !== 'production') {
       assert(false, `use store.replaceState() to explicit replace store state.`)
@@ -174,11 +176,14 @@ export class Store {
     return genericSubscribe(fn, this._subscribers)
   }
 
+  // subscribeAction 也可以指定订阅处理函数的被调用时机应该在一个 action 分发之前还是之后
+  // 当参数为函数时默认行为是 action 分发之前调用
   subscribeAction (fn) {
     const subs = typeof fn === 'function' ? { before: fn } : fn
     return genericSubscribe(subs, this._actionSubscribers)
   }
 
+  // 这个watch方法就很简单啦，就是利用了一个新建的Vue对象监听
   watch (getter, cb, options) {
     if (process.env.NODE_ENV !== 'production') {
       assert(typeof getter === 'function', `store.watch only accepts a function.`)
@@ -186,6 +191,8 @@ export class Store {
     return this._watcherVM.$watch(() => getter(this.state, this.getters), cb, options)
   }
 
+  // 替换 store 的根状态，仅用状态合并或时光旅行调试
+  // 正常使用vuex应该是用不到的
   replaceState (state) {
     this._withCommit(() => {
       this._vm._data.$$state = state
@@ -238,6 +245,7 @@ export class Store {
   }
 }
 
+// 实现store.subscribe和store.subscribeAction方法，本质就是维持一个subs数组，在操作时forEach执行数组里的方法
 function genericSubscribe (fn, subs) {
   if (subs.indexOf(fn) < 0) {
     subs.push(fn)
@@ -313,7 +321,7 @@ function resetStoreVM (store, state, hot) {
 
 function installModule (store, rootState, path, module, hot) {
   const isRoot = !path.length
-  const namespace = store._modules.getNamespace(path)
+  const namespace = store._modules.getNamespace(path) // 根模块 ==> "", cart模块 "cart/"
 
   // register in namespace map
   if (module.namespaced) {
