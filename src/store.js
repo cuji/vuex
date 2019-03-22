@@ -281,6 +281,9 @@ function resetStoreVM (store, state, hot) {
   // use a Vue instance to store the state tree
   // suppress warnings just in case the user has added
   // some funky global mixins
+  // 第一个问题，我们的state到底存在了哪里？
+  // 答案就是我们的state存在了一个新的Vue实例中的$$state属性里
+  // 取消Vue的所有日志和警告
   const silent = Vue.config.silent
   Vue.config.silent = true
   store._vm = new Vue({
@@ -478,6 +481,7 @@ function registerGetter (store, type, rawGetter, local) {
   }
 }
 
+// 监听state的变化，如果不是通过指定方法调用（即_committing值为false时），答应相应warning
 function enableStrictMode (store) {
   store._vm.$watch(function () { return this._data.$$state }, () => {
     if (process.env.NODE_ENV !== 'production') {
